@@ -1,10 +1,13 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import * as dotenv from 'dotenv';
+import { config } from 'dotenv';
+import { resolve } from 'path';
 
-dotenv.config();
+const ENV_PATH = resolve(process.cwd(), `.env.${process.env.NODE_ENV}`);
 
-console.log(process.env.PG_HOST);
+config({
+  path: ENV_PATH,
+});
 
 const configService = new ConfigService();
 
@@ -12,9 +15,9 @@ const dbConfig: DataSourceOptions = {
   type: 'postgres',
   synchronize: false,
   migrations: ['migrations/*.ts'],
-  entities: ['**/*.entity.ts'],
+  entities: ['**/*.entity.js'],
   host: configService.get('PG_HOST'),
-  port: configService.get('PG_PORT'),
+  port: +configService.get('PG_PORT'),
   username: configService.get('PG_USER'),
   password: configService.get('PG_PASSWORD'),
   database: configService.get('PG_DB'),
@@ -25,6 +28,7 @@ switch (process.env.NODE_ENV) {
     break;
   case 'test':
     Object.assign(dbConfig, {
+      entities: ['**/*.entity.ts'],
       migrationsRun: true,
     });
     break;
@@ -42,7 +46,5 @@ switch (process.env.NODE_ENV) {
   default:
     throw new Error('unknown environment');
 }
-
-console.log({ dbConfig });
 
 export default new DataSource(dbConfig);

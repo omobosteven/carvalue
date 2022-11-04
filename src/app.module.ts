@@ -8,6 +8,7 @@ import { ReportsModule } from 'src/reports/reports.module';
 // import { User } from 'src/users/user.entity';
 // import { Report } from 'src/reports/report.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import dbConfig from '../typeorm.config';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieSession = require('cookie-session');
@@ -22,12 +23,7 @@ const cookieSession = require('cookie-session');
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('PG_HOST'),
-        port: +config.get('PG_PORT'),
-        username: config.get('PG_USER'),
-        password: config.get('PG_PASSWORD'),
-        database: config.get('PG_DB'),
+        dbConfig,
         // we need to manually add every entity we don't user through TypeOrmModules.forFeatures()
         entities: [],
         autoLoadEntities: true,
